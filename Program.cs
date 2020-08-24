@@ -41,6 +41,34 @@ namespace OpenXML
             };
             sheets.Append(sheet);
 
+            // Add a WorkbookStylePart to the WorkbookPart and initialize its Stylesheet:
+            WorkbookStylesPart stylePart = workbookpart.AddNewPart<WorkbookStylesPart>();
+            stylePart.Stylesheet = GenerateStylesheet();
+            stylePart.Stylesheet.Save();
+
+            // Setting up columns
+            // Adding custom width to specific columns is very easy. First we need to create a Columns 
+            // object and then add one or more Column as its children which each will define the custom 
+            // width of a range of columns in the spreadsheet. You can explore the properties of the 
+            // column to specify more customization on columns. Here we are only interested in specifying 
+            // the width of the columns.
+            Columns columns = new Columns(
+                    new Column // Id column
+                        {
+                        Min = 1,
+                        Max = 1,
+                        Width = 4,
+                        CustomWidth = true
+                    },
+                    new Column // Name and Birthday columns
+                        {
+                        Min = 2,
+                        Max = 3,
+                        Width = 15,
+                        CustomWidth = true
+                    });
+            worksheetPart.Worksheet.AppendChild(columns);
+
             // At the end save the Workbook.
             workbookpart.Workbook.Save();
 
@@ -51,9 +79,9 @@ namespace OpenXML
             Row headerRow = new Row();
             // Add cells to the header row
             headerRow.Append(
-                ConstructCell("Id", CellValues.String),
-                ConstructCell("Name", CellValues.String),
-                ConstructCell("Birth Date", CellValues.String));
+                ConstructCell("Id", CellValues.String, 2),
+                ConstructCell("Name", CellValues.String, 2),
+                ConstructCell("Birth Date", CellValues.String, 2));
             // Insert the header row to the Sheet Data
             sheetData.AppendChild(headerRow);
 
@@ -61,11 +89,14 @@ namespace OpenXML
             Row dataRow = new Row();
             // Add cells to the data row
             dataRow.Append(
-                ConstructCell("1", CellValues.String),
-                ConstructCell("Oliver Ofenloch", CellValues.String),
-                ConstructCell("2020-08-24", CellValues.String));
-            // Insert the header row to the Sheet Data
+                ConstructCell("1", CellValues.String, 1),
+                ConstructCell("Oliver Ofenloch", CellValues.String, 1),
+                ConstructCell("2020-08-24", CellValues.String, 1));
+            // Insert the data row to the Sheet Data
             sheetData.AppendChild(dataRow);
+
+
+
 
             // Close the document.
             spreadsheetDocument.Close();
@@ -82,6 +113,60 @@ namespace OpenXML
             };
         }
 
+        static public Cell ConstructCell(string value, CellValues dataType, uint styleIndex = 0)
+        {
+            return new Cell()
+            {
+                CellValue = new CellValue(value),
+                DataType = new EnumValue<CellValues>(dataType),
+                StyleIndex = styleIndex
+            };
+        }
+
+        // This is from http://www.dispatchertimer.com/tutorial/how-to-create-an-excel-file-in-net-using-openxml-part-3-add-stylesheet-to-the-spreadsheet/
+        static public Stylesheet GenerateStylesheet()
+        {
+            Stylesheet styleSheet = null;
+
+            Fonts fonts = new Fonts(
+                new Font( // Index 0 - default
+                    new FontSize() { Val = 10 }
+
+                ),
+                new Font( // Index 1 - header
+                    new FontSize() { Val = 10 },
+                    new Bold(),
+                    new Color() { Rgb = "FFFFFF" }
+
+                ));
+
+            Fills fills = new Fills(
+                    new Fill(new PatternFill() { PatternType = PatternValues.None }), // Index 0 - default
+                    new Fill(new PatternFill() { PatternType = PatternValues.Gray125 }), // Index 1 - default
+                    new Fill(new PatternFill(new ForegroundColor { Rgb = new HexBinaryValue() { Value = "66666666" } })
+                    { PatternType = PatternValues.Solid }) // Index 2 - header
+                );
+
+            Borders borders = new Borders(
+                    new Border(), // index 0 default
+                    new Border( // index 1 black border
+                        new LeftBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
+                        new RightBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
+                        new TopBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
+                        new BottomBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
+                        new DiagonalBorder())
+                );
+
+            CellFormats cellFormats = new CellFormats(
+                    new CellFormat(), // default
+                    new CellFormat { FontId = 0, FillId = 0, BorderId = 1, ApplyBorder = true }, // body
+                    new CellFormat { FontId = 1, FillId = 2, BorderId = 1, ApplyFill = true } // header
+                );
+
+            styleSheet = new Stylesheet(fonts, fills, borders, cellFormats);
+
+            return styleSheet;
+        }
 
         // This is from the MS docs at https://docs.microsoft.com/en-us/office/open-xml/how-to-create-a-spreadsheet-document-by-providing-a-file-name#sample-code
         public static void CreateSpreadsheetWorkbook(string filepath)
