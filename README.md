@@ -33,13 +33,34 @@ ofenloch@teben:~/workspaces/dotnet/OpenXML$ git commit -a -m"initial commit afte
 ofenloch@teben:~/workspaces/dotnet/OpenXML$ 
 ```
 
-Run `dotnet run` to build and run the new application:
+Run `dotnet run` to **build and run the new application**:
 
 ```bash
 ofenloch@teben:~/workspaces/dotnet/OpenXML$ dotnet run
 Hello World!
 ofenloch@teben:~/workspaces/dotnet/OpenXML$ 
 ```
+
+Run `dotnet add package DocumentFormat.OpenXml` to **add the OpenXML package as a dependency to the project**:
+
+```bash
+ofenloch@teben:~/workspaces/dotnet/OpenXML$ dotnet add package DocumentFormat.OpenXml
+  Writing /tmp/tmp76HFeK.tmp
+info : Adding PackageReference for package 'DocumentFormat.OpenXml' into project '/home/ofenloch/workspaces/dotnet/OpenXML/OpenXML.csproj'.
+info : Restoring packages for /home/ofenloch/workspaces/dotnet/OpenXML/OpenXML.csproj...
+info :   GET https://api.nuget.org/v3-flatcontainer/documentformat.openxml/index.json
+info :   OK https://api.nuget.org/v3-flatcontainer/documentformat.openxml/index.json 138ms
+info :   GET https://api.nuget.org/v3-flatcontainer/documentformat.openxml/2.11.3/documentformat.openxml.2.11.3.nupkg
+info :   OK https://api.nuget.org/v3-flatcontainer/documentformat.openxml/2.11.3/documentformat.openxml.2.11.3.nupkg 30ms
+info : Installing DocumentFormat.OpenXml 2.11.3.
+info : Package 'DocumentFormat.OpenXml' is compatible with all the specified frameworks in project '/home/ofenloch/workspaces/dotnet/OpenXML/OpenXML.csproj'.
+info : PackageReference for package 'DocumentFormat.OpenXml' version '2.11.3' added to file '/home/ofenloch/workspaces/dotnet/OpenXML/OpenXML.csproj'.
+info : Committing restore...
+info : Writing assets file to disk. Path: /home/ofenloch/workspaces/dotnet/OpenXML/obj/project.assets.json
+log  : Restore completed in 2.74 sec for /home/ofenloch/workspaces/dotnet/OpenXML/OpenXML.csproj.
+ofenloch@teben:~/workspaces/dotnet/OpenXML$ 
+```
+
 
 Run `dotnet --help` to get more info:
 
