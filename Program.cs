@@ -1,4 +1,6 @@
 ﻿using System;
+using DocumentFormat.OpenXml; // dotnet add package DocumentFormat.OpenXml
+using DocumentFormat.OpenXml.Packaging;
 
 namespace OpenXML
 {
