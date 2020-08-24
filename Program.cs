@@ -11,10 +11,84 @@ namespace OpenXML
             Console.WriteLine("Hello, World!");
             string sSpreadsheetFileName = "hello.xlsx";
 
+            // Create a SpreadsheetDocument
+            SpreadsheetDocument spreadsheetDocument = createSpreadsheetWorkbook(sSpreadsheetFileName);
 
+            // Close the SpreadsheetDocument.
+            spreadsheetDocument.Close();
+
+
+        } // static void Main(string[] args)
+
+        static public Cell ConstructCell(string value, CellValues dataType)
+        {
+            return new Cell()
+            {
+                CellValue = new CellValue(value),
+                DataType = new EnumValue<CellValues>(dataType)
+            };
+        }
+
+        static public Cell ConstructCell(string value, CellValues dataType, uint styleIndex = 0)
+        {
+            return new Cell()
+            {
+                CellValue = new CellValue(value),
+                DataType = new EnumValue<CellValues>(dataType),
+                StyleIndex = styleIndex
+            };
+        }
+
+        // This is from http://www.dispatchertimer.com/tutorial/how-to-create-an-excel-file-in-net-using-openxml-part-3-add-stylesheet-to-the-spreadsheet/
+        static public Stylesheet GenerateStylesheet()
+        {
+            Stylesheet styleSheet = null;
+
+            Fonts fonts = new Fonts(
+                new Font( // Index 0 - default
+                    new FontSize() { Val = 10 }
+
+                ),
+                new Font( // Index 1 - header
+                    new FontSize() { Val = 10 },
+                    new Bold(),
+                    new Color() { Rgb = "FFFFFF" }
+
+                ));
+
+            Fills fills = new Fills(
+                    new Fill(new PatternFill() { PatternType = PatternValues.None }), // Index 0 - default
+                    new Fill(new PatternFill() { PatternType = PatternValues.Gray125 }), // Index 1 - default
+                    new Fill(new PatternFill(new ForegroundColor { Rgb = new HexBinaryValue() { Value = "66666666" } })
+                    { PatternType = PatternValues.Solid }) // Index 2 - header
+                );
+
+            Borders borders = new Borders(
+                    new Border(), // index 0 default
+                    new Border( // index 1 black border
+                        new LeftBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
+                        new RightBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
+                        new TopBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
+                        new BottomBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
+                        new DiagonalBorder())
+                );
+
+            CellFormats cellFormats = new CellFormats(
+                    new CellFormat(), // default
+                    new CellFormat { FontId = 0, FillId = 0, BorderId = 1, ApplyBorder = true }, // body
+                    new CellFormat { FontId = 1, FillId = 2, BorderId = 1, ApplyFill = true } // header
+                );
+
+            styleSheet = new Stylesheet(fonts, fills, borders, cellFormats);
+
+            return styleSheet;
+        }
+
+
+        public static SpreadsheetDocument createSpreadsheetWorkbook(string filepath) {
             // Create a spreadsheet document by supplying the filepath.
             // By default, AutoSave = true, Editable = true, and Type = xlsx.
-            SpreadsheetDocument spreadsheetDocument = SpreadsheetDocument.Create(sSpreadsheetFileName, SpreadsheetDocumentType.Workbook);
+            SpreadsheetDocument spreadsheetDocument = SpreadsheetDocument.Create(filepath, SpreadsheetDocumentType.Workbook);
 
             // Add a WorkbookPart to the document (A SpreadsheetDocument must have at least a WorkbookPart and a WorkSheetPart.)
             WorkbookPart workbookpart = spreadsheetDocument.AddWorkbookPart();
@@ -95,78 +169,9 @@ namespace OpenXML
             // Insert the data row to the Sheet Data
             sheetData.AppendChild(dataRow);
 
+            return spreadsheetDocument;
+        } // public static SpreadsheetDocument createSpreadsheetWorkbook(string filepath)
 
-
-
-            // Close the document.
-            spreadsheetDocument.Close();
-
-
-        } // static void Main(string[] args)
-
-        static public Cell ConstructCell(string value, CellValues dataType)
-        {
-            return new Cell()
-            {
-                CellValue = new CellValue(value),
-                DataType = new EnumValue<CellValues>(dataType)
-            };
-        }
-
-        static public Cell ConstructCell(string value, CellValues dataType, uint styleIndex = 0)
-        {
-            return new Cell()
-            {
-                CellValue = new CellValue(value),
-                DataType = new EnumValue<CellValues>(dataType),
-                StyleIndex = styleIndex
-            };
-        }
-
-        // This is from http://www.dispatchertimer.com/tutorial/how-to-create-an-excel-file-in-net-using-openxml-part-3-add-stylesheet-to-the-spreadsheet/
-        static public Stylesheet GenerateStylesheet()
-        {
-            Stylesheet styleSheet = null;
-
-            Fonts fonts = new Fonts(
-                new Font( // Index 0 - default
-                    new FontSize() { Val = 10 }
-
-                ),
-                new Font( // Index 1 - header
-                    new FontSize() { Val = 10 },
-                    new Bold(),
-                    new Color() { Rgb = "FFFFFF" }
-
-                ));
-
-            Fills fills = new Fills(
-                    new Fill(new PatternFill() { PatternType = PatternValues.None }), // Index 0 - default
-                    new Fill(new PatternFill() { PatternType = PatternValues.Gray125 }), // Index 1 - default
-                    new Fill(new PatternFill(new ForegroundColor { Rgb = new HexBinaryValue() { Value = "66666666" } })
-                    { PatternType = PatternValues.Solid }) // Index 2 - header
-                );
-
-            Borders borders = new Borders(
-                    new Border(), // index 0 default
-                    new Border( // index 1 black border
-                        new LeftBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
-                        new RightBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
-                        new TopBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
-                        new BottomBorder(new Color() { Auto = true }) { Style = BorderStyleValues.Thin },
-                        new DiagonalBorder())
-                );
-
-            CellFormats cellFormats = new CellFormats(
-                    new CellFormat(), // default
-                    new CellFormat { FontId = 0, FillId = 0, BorderId = 1, ApplyBorder = true }, // body
-                    new CellFormat { FontId = 1, FillId = 2, BorderId = 1, ApplyFill = true } // header
-                );
-
-            styleSheet = new Stylesheet(fonts, fills, borders, cellFormats);
-
-            return styleSheet;
-        }
 
         // This is from the MS docs at https://docs.microsoft.com/en-us/office/open-xml/how-to-create-a-spreadsheet-document-by-providing-a-file-name#sample-code
         public static void CreateSpreadsheetWorkbook(string filepath)
